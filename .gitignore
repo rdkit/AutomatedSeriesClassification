@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#
+*.pkl
+*.db
+*.sdf.gz
+*.xls
+rdk_db
+CDK2Kinase
+BACE
+
