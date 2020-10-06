@@ -22,9 +22,15 @@ $ python dataprep.py # it'll take ~30 or more minutes on my PC
 - Then launch jupyter notebook, the notebook use same dataset as original articles. But you'll get different results compared to the article. This is because I used more newer version of ChEMBL for this code. If you would like to use same dataset to original article it is easy, just changing download link of chembl
 
 
+## Acknoledgements
+
+- Greg Landrum
+
+
 ## etc
 
 Any comments, requests and suggestions will be greatly appreciated.
+
 
 
 ## License
