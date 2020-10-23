@@ -8,6 +8,17 @@ This is code for automated chemical series classification
 Automated Identification of Chemical Series: Classifying like a Medicinal Chemist
 https://pubs.acs.org/doi/abs/10.1021/acs.jcim.0c00204
 
+## Installation
+
+The code can be downloaded and installed with:
+
+```bash
+git clone https://github.com/iwatobipen/AutomatedSeriesClassification
+cd AutomatedSeriesClassification
+pip install -e .
+```
+
+The ``-e`` flag means it gets installed in editable mode.
 
 ## Example usage
 
