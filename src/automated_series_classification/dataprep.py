@@ -9,21 +9,35 @@ from tqdm import tqdm
 
 RDLogger.DisableLog("rdApp.warning")
 
+# See https://pubs.acs.org/doi/10.1021/jm020472j
+bradley_url = 'https://pubs.acs.org/doi/suppl/10.1021/jm020472j/suppl_file/jm020472j_s2.xls'
+
 
 @click.command()
-@click.option('--directory', type=click.Path(file_okay=False, dir_okay=True), default=os.getcwd)
+@click.option(
+    '--directory', type=click.Path(file_okay=False, dir_okay=True),
+    default=os.getcwd, help='Defaults to current directory',
+)
 @click.option('--chebml-version', default='27', show_default=True)
 def main(directory: str, chebml_version: str):
     """Download the ChEBML data."""
-    url = (
+    os.makedirs(directory, exist_ok=True)
+
+    bradley_path = os.path.join(directory, 'jm020472j_s2.xls')
+    if not os.path.exists(bradley_path):
+        try:
+            wget.download(bradley_url, out=directory)
+        except:
+            click.echo('There goes ACS stopping science')
+
+    chembl_url = (
         f'ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/'
         f'chembl_{chebml_version}/chembl_{chebml_version}.sdf.gz'
     )
-    os.makedirs(directory, exist_ok=True)
 
     sdf_path = os.path.join(directory, f'chembl_{chebml_version}.sdf.gz')
     if not os.path.exists(sdf_path):
-        wget.download(url, out=directory)
+        wget.download(chembl_url, out=directory)
 
     sss_path = os.path.join(directory, f'chembl{chebml_version}_sssdata.pkl')
     if not os.path.exists(sss_path):
