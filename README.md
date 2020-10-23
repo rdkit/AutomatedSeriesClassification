@@ -10,7 +10,7 @@ https://pubs.acs.org/doi/abs/10.1021/acs.jcim.0c00204
 
 ## Installation
 
-The code can be downloaded and installed with:
+First, you should have RDKit installed. Then, the code can be downloaded and installed with:
 
 ```bash
 git clone https://github.com/iwatobipen/AutomatedSeriesClassification
