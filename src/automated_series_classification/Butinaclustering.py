@@ -7,7 +7,7 @@ Created on Tue Jan 28 14:14:10 2020
 """
 
 import numpy as np
-from AutomatedSeriesClassification import utilsStructureEval
+from automated_series_classification import utilsStructureEval
 
 def ApplyButina(distdata, moldata, chembldb, flimit, MinClusterSize,calcScores):
     MCSdict={}
