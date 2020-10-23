@@ -1,37 +1,36 @@
-import os
-import wget
-from rdkit import Chem
-from rdkit.Chem import rdSubstructLibrary
-from rdkit import RDLogger
-from rdkit import rdBase
-import pickle
-import time
 import gzip
-print(rdBase.rdkitVersion)
+import os
+import pickle
+
+import wget
+from rdkit import Chem, RDLogger, rdBase
+from tqdm import tqdm
+
+print('RDKit Version', rdBase.rdkitVersion)
 RDLogger.DisableLog("rdApp.warning")
 
 url = 'ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_27.sdf.gz'
-if not os.path.exists('./chembl_27.sdf.gz'):
+sdf_path = './chembl_27.sdf.gz'
+sss_path = './data/chembl27_sssdata.pkl'
+
+if not os.path.exists(sdf_path):
     filename = wget.download(url)
 
-gz = gzip.GzipFile('./chembl_27.sdf.gz')
-suppl = Chem.ForwardSDMolSupplier(gz)
+os.makedirs('./data', exist_ok=True)
 
-
-if not os.path.exists('./data'):
-    os.mkdir('./data')
-if not os.path.exists('./data/chembl27_sssdata.pkl'):
-    t1=time.time()
+if not os.path.exists(sss_path):
     data = []
-    for i,mol in enumerate(suppl):
-        if not ((i+1)%50000):
-            print(f"Processed {i+1} molecules in {(time.time()-t1):.1f} seconds")
-        if mol is None or mol.GetNumAtoms()>50:
-            continue
-        fp = Chem.PatternFingerprint(mol)
-        smi = Chem.MolToSmiles(mol)
-        data.append((smi,fp))
-    t2=time.time()
-    pickle.dump(data,open('./data/chembl27_sssdata.pkl','wb+'))
+
+    with gzip.GzipFile(sdf_path) as gz:
+        suppl = Chem.ForwardSDMolSupplier(gz)
+        for mol in tqdm(suppl, desc='Processing molecules', unit_scale=True):
+            if mol is None or mol.GetNumAtoms() > 50:
+                continue
+            fp = Chem.PatternFingerprint(mol)
+            smi = Chem.MolToSmiles(mol)
+            data.append((smi, fp))
+
+    with open(sss_path, 'wb') as file:
+        pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 print('Done ;)')
