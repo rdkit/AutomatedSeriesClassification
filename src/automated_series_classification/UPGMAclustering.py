@@ -8,7 +8,7 @@ Created on Mon Jan 27 16:07:23 2020
 import numpy as np
 import sklearn
 from sklearn.cluster import AgglomerativeClustering
-from AutomatedSeriesClassification import utilsStructureEval
+from automated_series_classification import utilsStructureEval
 try:
     import arthor
 except ImportError:

@@ -19,7 +19,7 @@ import random
 import pandas as pd
 import copy
 
-from AutomatedSeriesClassification import UPGMAclustering, Butinaclustering, utilsDataPrep
+from automated_series_classification import UPGMAclustering, Butinaclustering, utilsDataPrep
 
 class Classification:
     
