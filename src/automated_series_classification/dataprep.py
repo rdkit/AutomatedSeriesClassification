@@ -5,6 +5,7 @@ import pickle
 import click
 import wget
 from rdkit import Chem, RDLogger, rdBase
+from rdkit.Chem import rdSubstructLibrary
 from tqdm import tqdm
 
 RDLogger.DisableLog("rdApp.warning")
@@ -55,7 +56,13 @@ def main(directory: str, chebml_version: str):
 
         click.echo(f'Outputting to {sss_path}')
         with open(sss_path, 'wb') as file:
-            pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+            mols = rdSubstructLibrary.CachedTrustedSmilesMolHolder()
+            fps = rdSubstructLibrary.PatternHolder()
+            for smi,fp in data:
+                mols.AddSmiles(smi)
+                fps.AddFingerprint(fp)
+            library = rdSubstructLibrary.SubstructLibrary(mols,fps)
+            pickle.dump(library, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     click.echo('Done ;)')
 
