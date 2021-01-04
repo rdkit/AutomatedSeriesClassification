@@ -58,7 +58,7 @@ def CalcScore(children,distdata,NumMolList):
         
     return ScoreDict
 
-def DetermineRelevantMCS(Ndata,children,MolDict,ScoreDict,chembldb,moldata,flimit,MinClusterSize, calcScores):
+def DetermineRelevantMCS(Ndata,children,MolDict,ScoreDict,chembldb,moldata,flimit,MinClusterSize, calcScores, onlyCompleteRings=False):
     # filter out irrelevant clusters and calculate MCS on selected clusters
     currlayer=[Ndata*2-2]
     MCSdict={}
@@ -71,7 +71,7 @@ def DetermineRelevantMCS(Ndata,children,MolDict,ScoreDict,chembldb,moldata,flimi
         for c in currlayer:
             if c>=Ndata:
                 if len(MolDict[c])>=MinClusterSize:
-                    fChembl,Smarts=utilsStructureEval.MCSFromMollist(moldata.Molecule.iloc[MolDict[c]].tolist(),chembldb,Nchembl)
+                    fChembl,Smarts=utilsStructureEval.MCSFromMollist(moldata.Molecule.iloc[MolDict[c]].tolist(),chembldb,Nchembl,onlyCompleteRings=onlyCompleteRings)
                     if fChembl>=flimit:
                         childlayer+=children[c-Ndata].tolist()
                     else:
@@ -82,7 +82,7 @@ def DetermineRelevantMCS(Ndata,children,MolDict,ScoreDict,chembldb,moldata,flimi
         currlayer=childlayer
     return MCSdict
 
-def ApplyUPGMA(distdata_proj,moldata_proj,chembldb, flimit, MinClusterSize, calcScores):
+def ApplyUPGMA(distdata_proj,moldata_proj,chembldb, flimit, MinClusterSize, calcScores, onlyCompleteRings=False):
     # Apply UPGMA clustering
     cluster=AgglomerativeClustering(n_clusters=2, compute_full_tree=True, affinity='precomputed',linkage='average')
     cluster.fit(distdata_proj)
@@ -96,7 +96,7 @@ def ApplyUPGMA(distdata_proj,moldata_proj,chembldb, flimit, MinClusterSize, calc
         ScoreDict={}
         
     # filter out irrelevant clusters and calculate MCS on selected clusters
-    MCSdict=DetermineRelevantMCS(len(distdata_proj),cluster.children_,MolDict,ScoreDict,chembldb,moldata_proj,flimit,MinClusterSize, calcScores)
+    MCSdict=DetermineRelevantMCS(len(distdata_proj),cluster.children_,MolDict,ScoreDict,chembldb,moldata_proj,flimit,MinClusterSize, calcScores, onlyCompleteRings=onlyCompleteRings)
         
     return MCSdict
 
