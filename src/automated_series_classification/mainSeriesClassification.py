@@ -23,7 +23,8 @@ from automated_series_classification import UPGMAclustering, Butinaclustering, u
 
 class Classification:
     
-    def __init__(self, proj, datapath, dbpath, chembldb, flimit=1e-3, MinClusterSize=20, clustering='UPGMA', calcDists=True, calcScores=False):
+    def __init__(self, proj, datapath, dbpath, filename, chembldb, flimit=1e-3, MinClusterSize=20, clustering='UPGMA', 
+                calcDists=True, calcScores=False, smilesCol='Smiles', idCol='ID', onlyCompleteRings=False):
         self.proj=proj
         self.datapath=datapath
         self.dbpath=dbpath
@@ -33,13 +34,16 @@ class Classification:
         self.clustering=clustering
         self.calcScores=calcScores
         self.calcDists=calcDists
+        self.smilesCol = smilesCol
+        self.idCol = idCol
+        self.onlyCompleteRings = onlyCompleteRings
         # load data
-        self.moldata_proj, self.distdata_proj=utilsDataPrep.PrepareData(self.proj,self.datapath,distMeasure='Tanimoto',FP='Morgan2', calcDists=self.calcDists)
+        self.moldata_proj, self.distdata_proj=utilsDataPrep.PrepareData(self.proj,self.datapath,filename,distMeasure='Tanimoto',FP='Morgan2', calcDists=self.calcDists, smilesCol=smilesCol)
         if arthor is not None:
             if not os.path.isdir(dbpath):
                 os.mkdir(dbpath)    
             # set up project database for arthor substructure matching        
-            df=self.moldata_proj[['Structure','ID']]
+            df=self.moldata_proj[[smilesCol,idCol]]
             df.to_csv('./arthor/{0}.smi'.format(self.proj), header=None, index=None, sep=' ')
             os.system('smi2atdb -j 0 -t {0}{1}.smi {0}{1}.atdb'.format(self.dbpath,self.proj))
             os.system('atdb2fp -j 0 {0}{1}.atdb'.format(self.dbpath,self.proj))
@@ -53,7 +57,7 @@ class Classification:
                     print("creating database")
                     mols = rdSubstructLibrary.CachedTrustedSmilesMolHolder()
                     fps = rdSubstructLibrary.PatternHolder()
-                    for smi in self.moldata_proj['Structure']:
+                    for smi in self.moldata_proj[smilesCol]:
                         m = Chem.MolFromSmiles(smi)
                         mols.AddSmiles(Chem.MolToSmiles(m))
                         fps.AddFingerprint(Chem.PatternFingerprint(m))
@@ -92,7 +96,6 @@ class Classification:
             if add==1 and MolAssign_prel[key1] not in MolAssignment.values():
                 MolAssignment[key1]=MolAssign_prel[key1]
     
-        
         MolAssignment={k:MolAssignment[k] for k in MolAssignment.keys() if len(MolAssignment[k])>self.MinClusterSize}
         if self.calcScores:
             MCSdict={k:(MCSdict[k][0],len(MolAssignment[k]),MCSdict[k][2], MCSdict[k][3], MolAssignment[k]) for k in MolAssignment.keys()}
@@ -105,7 +108,7 @@ class Classification:
     
         # apply custering and calculate MCS
         if self.clustering == 'UPGMA':
-            MCSdict=UPGMAclustering.ApplyUPGMA(self.distdata_proj,self.moldata_proj,self.chembldb, self.flimit, self.MinClusterSize, self.calcScores)
+            MCSdict=UPGMAclustering.ApplyUPGMA(self.distdata_proj,self.moldata_proj,self.chembldb, self.flimit, self.MinClusterSize, self.calcScores, onlyCompleteRings=self.onlyCompleteRings)
         elif self.clustering == 'Butina':
             distdata=copy.deepcopy(self.distdata_proj)
             MCSdict=Butinaclustering.ApplyButina(distdata, self.moldata_proj, self.chembldb, self.flimit, self.MinClusterSize,self.calcScores)
@@ -120,7 +123,7 @@ class Classification:
         self.moldata_proj['ClusterID']=[list() for x in range(len(self.moldata_proj.index))]
             
         for k in self.MolAssignment.keys():
-            self.moldata_proj['ClusterID'].loc[self.moldata_proj['ID'].map(lambda x: x in self.MolAssignment[k])].apply(lambda x: x.append(k))
+            self.moldata_proj['ClusterID'].iloc[self.MolAssignment[k]].map(lambda x: x.append(k))
         
         if self.clustering=='UPGMA':
             self.moldata_proj.to_csv('{0}moldata_UPGMA.csv'.format(self.datapath))
@@ -152,7 +155,7 @@ class Classification:
         NMatchScaf=[]
         NMatchCluster=np.array([len(v) for v in self.MolAssignment.values()])
         for scaf_ind in range(len(scaflist)):
-            mollist=self.moldata_proj['ID'].loc[self.moldata_proj[seriescolumn].map(lambda x: scaflist[scaf_ind] in x)].tolist()
+            mollist=self.moldata_proj[self.idCol].loc[self.moldata_proj[seriescolumn].map(lambda x: scaflist[scaf_ind] in x)].tolist()
             intersect_scaf=np.array([len(list(set(mollist)&set(clusterlist))) for clusterlist in self.MolAssignment.values()])
             intersect_matrix[scaf_ind,:]=intersect_scaf
             NMatchScaf.append(len(mollist))

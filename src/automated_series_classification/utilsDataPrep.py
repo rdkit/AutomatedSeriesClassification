@@ -26,11 +26,11 @@ def calcDistMatrix(df, distMeasure):
         return
     return dists 
 
-def readProjectData(filename, FP):
+def readProjectData(filename, FP, smilesCol):
     # reads in the project data and calculates fingerprints
-    df_proj=pd.read_csv(filename,names=['ID','Structure','mol name','scaffold','series assignment','assay'], skiprows=[0])
+    df_proj=pd.read_csv(filename)#,names=['ID','Structure','mol name','scaffold','series assignment','assay'], skiprows=[0])
     #df_proj = df_proj.head(100)
-    PandasTools.AddMoleculeColumnToFrame(df_proj,smilesCol='Structure',molCol='Molecule')
+    PandasTools.AddMoleculeColumnToFrame(df_proj,smilesCol=smilesCol,molCol='Molecule')
     df_proj=df_proj.loc[df_proj['Molecule'].map(lambda x: x is not None)]
     if FP=='Morgan2':
         df_proj['FP']=df_proj.Molecule.map(lambda x : AllChem.GetMorganFingerprint(x,2))
@@ -40,10 +40,10 @@ def readProjectData(filename, FP):
     return df_proj
 
 
-def PrepareData(proj,datapath,distMeasure='Tanimoto',FP='Morgan2', calcDists=False):
+def PrepareData(proj,datapath,filename,distMeasure='Tanimoto',FP='Morgan2', calcDists=False, smilesCol='Smiles'):
     # reads in project data and distance matrix (or calculate distance matrix)
-    filename='{0}moldata_preprocessed.csv'.format(datapath)
-    moldata=readProjectData(filename, FP)
+    filename='{0}{1}'.format(datapath,filename)
+    moldata=readProjectData(filename, FP, smilesCol)
     print(f'read {len(moldata)} molecules')
     if calcDists:
         dists=calcDistMatrix(moldata, distMeasure)
@@ -54,3 +54,4 @@ def PrepareData(proj,datapath,distMeasure='Tanimoto',FP='Morgan2', calcDists=Fal
             dists=pickle.load(filein)
     
     return moldata, dists
+

@@ -57,6 +57,9 @@ def SvgsToGrid(svgs, labels, svgsPerRow=4,molSize=(250,150),fontSize=12):
         if not hdr: 
             hdr = h.replace("width='"+str(molSize[0])+"px'","width='%dpx'"%fullSize[0])
             hdr = hdr.replace("height='"+str(molSize[1])+"px'","height='%dpx'"%fullSize[1])
+            hdr = hdr.replace("viewBox='0 0 %d %d'"%(molSize[0],molSize[1]),
+                              "viewBox='0 0 %d %d'"%(fullSize[0],fullSize[1]))
+
         if not rect: 
             rect = r
         legend = '<text font-family="sans-serif" font-size="'+str(fontSize)+'px" text-anchor="middle" fill="black">\n'

@@ -15,9 +15,9 @@ except ImportError:
     arthor = None
 
 
-def MCSFromMollist(mollist,chembldb,Nchembl):
-    MCSSmarts2=rdFMCS.FindMCS(mollist,atomCompare=rdFMCS.AtomCompare.CompareAny,bondCompare=rdFMCS.BondCompare.CompareOrderExact,ringMatchesRingOnly=False,timeout=1).smartsString
-    MCSSmarts=rdFMCS.FindMCS(mollist,atomCompare=rdFMCS.AtomCompare.CompareElements,bondCompare=rdFMCS.BondCompare.CompareOrder,ringMatchesRingOnly=False,timeout=1).smartsString
+def MCSFromMollist(mollist,chembldb,Nchembl,onlyCompleteRings=False):
+    MCSSmarts2=rdFMCS.FindMCS(mollist,atomCompare=rdFMCS.AtomCompare.CompareAny,bondCompare=rdFMCS.BondCompare.CompareOrderExact,ringMatchesRingOnly=onlyCompleteRings,completeRingsOnly=onlyCompleteRings,timeout=1).smartsString
+    MCSSmarts=rdFMCS.FindMCS(mollist,atomCompare=rdFMCS.AtomCompare.CompareElements,bondCompare=rdFMCS.BondCompare.CompareOrder,ringMatchesRingOnly=onlyCompleteRings,completeRingsOnly=onlyCompleteRings,timeout=1).smartsString
     if MCSSmarts2=='': fChembl2=1
     else: fChembl2=getFChembl(MCSSmarts2,chembldb,Nchembl)
     if MCSSmarts=='': fChembl=1
