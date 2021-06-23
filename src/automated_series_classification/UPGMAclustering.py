@@ -82,7 +82,12 @@ def DetermineRelevantMCS(Ndata,children,MolDict,ScoreDict,chembldb,moldata,flimi
         currlayer=childlayer
     return MCSdict
 
-def ApplyUPGMA(distdata_proj,moldata_proj,chembldb, flimit, MinClusterSize, calcScores, onlyCompleteRings=False):
+def ApplyUPGMA(distdata_proj,moldata_proj,chembldb, flimit, MinClusterSize, calcScores, 
+        onlyCompleteRings=False, useArthor=True):
+    global arthor
+    if not useArthor:
+        arthor = None
+        utilsStructureEval.arthor = None
     # Apply UPGMA clustering
     cluster=AgglomerativeClustering(n_clusters=2, compute_full_tree=True, affinity='precomputed',linkage='average')
     cluster.fit(distdata_proj)
